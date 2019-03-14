@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - NestedDolls",
+            "request": "launch",
+            "mainClass": "NestedDolls",
+            "projectName": "03 Sliding, searching and sorting_b47a7d4c"
+        }
+    ]
+}
