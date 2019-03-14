@@ -87,12 +87,12 @@ public class PointsofSnow {
                 int D = io.getInt(); //Value 
                 segmentTree.updateRange(L, R, D);
                 
-                /*
+                
                 for (int j = 0; j < segmentTree.getLength(); j++) {
                     System.out.print(segmentTree.getTree()[j] + " ");
                 }
                 System.out.println();
-                */
+                
             }
 
             if (C.equals("?")) {
@@ -115,13 +115,11 @@ class SegmentTree {
         N = 2;
         while (2*n + 3 > N) {
             N *= 2;
-            System.out.println("N: " + N);
         }
 
         offset = 2;
         while (n + 2 > offset) {
             offset *= 2;
-            System.out.println("offset: " + offset);
         }
 
         tree = new int[N];
@@ -136,64 +134,98 @@ class SegmentTree {
     }
 
     void updateRange(int i, int j, int value) { //Is now update(); 
-        int L = i + offset;
-        int R = j + offset;  
-        System.out.println("L: " + L + " R: " + R);
+        int L = i + offset +1;
+        int R = j + offset +1;  
+        System.out.println("Starting L: " + L + " & Starting R: " + R);
 
         boolean wrongLRight = false;
         boolean wrongRLeft = false;
+        
+        int tempL = 0;
+        int tempR = 0;
 
         while (true) {
-            boolean LRight = (L % 2) == 1; //Is up right?
-            boolean RLeft = (R % 2) == 0; //Is up left?
-            
+            boolean LRight = (L % 2) == 0; //Is up right? 
+                //If LRight = False, child is outside interval
+                //If LRight = True, then child is in interval and we go up
+            boolean RLeft = (R % 2) == 1; //Is up left?
+                //If RLeft = False, child is outside interval
+                //If RLeft = True, then child is in interval and we go up
+
             L /= 2;
             R /= 2;
-
-            if (L == R) {
-                tree[L] += value;
-
-                if (LRight) {
-                    if (!wrongLRight)
-                        tree[(2*L) + 1] += value; //One LEFT of interval
-                } 
+        
+            if (L == R) { //If the same parent is met 
+                System.out.println("Parent on node: " + L);
+                if (!wrongLRight && !wrongRLeft) //Perfect interval, update parent of these indexes
+                    tree[L] += value;
                 else {
-                    wrongLRight = false;
+                    if (wrongLRight) { //Update the position where it was valid (node in interval)
+                        System.out.println("Updating node: " + tempL);
+                        tree[tempL] += value; 
+                    }
+                    else {//Went well for leftside, but not for right 
+                        System.out.println("Updating node: " + (L*2));
+                        tree[L*2] += value;
+                    }
+
+                    if (wrongRLeft) {
+                        System.out.println("Updating node: " + tempR);
+                        tree[tempR] += value;
+                    } 
+                    else { //Went well for rightside,but not for left 
+                        System.out.println("Updating node: " + (R*2+1));
+                        tree[R*2+1] += value;
+                    }
                 }
-                if (RLeft) {
-                    tree[2*R] += value;
-                }  
-                else {
-                    wrongRLeft = false;
-                }
+                break;
             }
             
-            break;
+            if (!LRight && !wrongLRight) { //If going upright from left-side is not valid (node not in interval)
+                System.out.println("Leftside: Going up right not valid to node: " + L);
+                wrongLRight = true;
+                tempL = L; //Previous position
+            }
+            else {
+                System.out.println("Leftside: Going up right to node: " + L);
+            }
+
+            if (!RLeft && !wrongRLeft) { //If going upleft from right-side is not valid (node not in interval)
+                System.out.println("Rightside: Going up left not valid to node: " + R);
+                wrongRLeft = true; //Else, remember latest where it was valid
+                tempR = R; //Previous position
+            } else {
+                System.out.println("Rightside: Going up left to node: " + R);
+            }
+
+            
+           
         }
     }
 
     int getSum(int index) {
         int pos = index + offset;
-        int sum = 0;
-
-        int L = pos;
-        int R = pos;  
-        
-        while (true) {
-            boolean LRight = (L % 2) == 1; //Is up right?
-            boolean RLeft = (R % 2) == 0; //Is up left?
-            L /= 2;
-            R /= 2;
+        System.out.println("Starting pos: " + pos);
+        int sum = tree[pos];
+        while (pos != 0) {
+            boolean upRight = (pos % 2) == 1; //Is up right?
+            boolean upLeft = (pos % 2) == 0; //Is up left?
+            pos /= 2;
+            if (upRight == upLeft) { //Cannot go anywhere, reached root
+                break;
+            }
             
-            if (LRight) {
-                sum += tree[2*L + 1]; //One LEFT of interval
+            if (upRight) {
+                System.out.println("Goint to node: " + pos + " and found value: " + tree[pos]);
+                sum += tree[pos]; 
             }
-            if (RLeft) {
-                sum += tree[2*R];
+            if (upLeft) {
+                System.out.println("Goint to node: " + pos + " and found value: " + tree[pos]);
+                sum += tree[pos];
             }
-            if (L == R) {
-                return sum;
-            }
+            
         }
+        return sum;
+
     }
 }
