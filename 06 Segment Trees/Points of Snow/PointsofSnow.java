@@ -1,4 +1,3 @@
-
 import java.util.StringTokenizer;
 import java.io.BufferedReader;
 import java.io.BufferedOutputStream;
@@ -67,7 +66,6 @@ class Kattio extends PrintWriter {
 
 
 public class PointsofSnow {
-    static int[] array;
     public static void main(String[] args) {
         Kattio io = new Kattio(System.in);
         
@@ -75,7 +73,6 @@ public class PointsofSnow {
         int K = io.getInt(); //Number of weather reports
         int Q = io.getInt(); //NUmber of snow depth queries
 
-        array = new int[N]; //Lineland
         SegmentTree segmentTree = new SegmentTree(N);
 
         for (int i = 0; i < K + Q; i++) {
@@ -85,20 +82,12 @@ public class PointsofSnow {
                 int L = io.getInt(); //Left
                 int R = io.getInt(); //Right
                 int D = io.getInt(); //Value 
-                segmentTree.updateRange(L, R, D);
-                
-                
-                for (int j = 0; j < segmentTree.getLength(); j++) {
-                    System.out.print(segmentTree.getTree()[j] + " ");
-                }
-                System.out.println();
-                
+                segmentTree.updateRange(L, R - 1, D);        
             }
 
             if (C.equals("?")) {
                 int X = io.getInt(); //Position we are interested in
-                System.out.println(segmentTree.getSum(X));
-                //System.out.println(segmentTree.getQ(X-1, X));
+                io.println(segmentTree.getSum(X - 1));
             }
         }
         io.close();
@@ -107,9 +96,9 @@ public class PointsofSnow {
 }
 
 class SegmentTree {
-    static int tree[];
-    static int offset;
-    static int N;
+    long tree[];
+    int offset;
+    int N;
 
     public SegmentTree (int n) {
         N = 2;
@@ -122,27 +111,28 @@ class SegmentTree {
             offset *= 2;
         }
 
-        tree = new int[N];
+        tree = new long[N];
     }
 
-    int getLength() {
+    long getLength() {
         return tree.length;
     }
 
-    int[] getTree() {
+    long[] getTree() {
         return tree;
     }
 
-    void updateRange(int i, int j, int value) { //Is now update(); 
-        int L = i + offset +1;
-        int R = j + offset +1;  
-        System.out.println("Starting L: " + L + " & Starting R: " + R);
+    void updateRange(int i, int j, int value) { 
+        int L = i + offset;
+        int R = j + offset;  
 
         boolean wrongLRight = false;
         boolean wrongRLeft = false;
-        
-        int tempL = 0;
-        int tempR = 0;
+
+        if (L == R) {
+            tree[L] += value;
+            return;
+        }
 
         while (true) {
             boolean LRight = (L % 2) == 0; //Is up right? 
@@ -155,77 +145,58 @@ class SegmentTree {
             L /= 2;
             R /= 2;
         
-            if (L == R) { //If the same parent is met 
-                System.out.println("Parent on node: " + L);
-                if (!wrongLRight && !wrongRLeft) //Perfect interval, update parent of these indexes
+            if (L == R) { //If the nodes meet on the same parent  
+                if (!wrongLRight && !wrongRLeft) { //Perfect interval, update parent of these indexes
                     tree[L] += value;
-                else {
-                    if (wrongLRight) { //Update the position where it was valid (node in interval)
-                        System.out.println("Updating node: " + tempL);
-                        tree[tempL] += value; 
-                    }
-                    else {//Went well for leftside, but not for right 
-                        System.out.println("Updating node: " + (L*2));
-                        tree[L*2] += value;
-                    }
-
-                    if (wrongRLeft) {
-                        System.out.println("Updating node: " + tempR);
-                        tree[tempR] += value;
-                    } 
-                    else { //Went well for rightside,but not for left 
-                        System.out.println("Updating node: " + (R*2+1));
-                        tree[R*2+1] += value;
-                    }
+                }
+                else if (wrongLRight && !wrongRLeft) {  //Update the node where it was valid (node in interval)
+                    tree[R*2+1] += value;
+                }
+                    
+                else if (wrongRLeft && !wrongLRight) {
+                    tree[L*2] += value;
+                    
                 }
                 break;
             }
             
-            if (!LRight && !wrongLRight) { //If going upright from left-side is not valid (node not in interval)
-                System.out.println("Leftside: Going up right not valid to node: " + L);
-                wrongLRight = true;
-                tempL = L; //Previous position
+            if (LRight) { //If going upright from left-side is not valid (node not in interval)
+                if (wrongLRight) {
+                    tree[L*2+1] += value;
+                }
             }
             else {
-                System.out.println("Leftside: Going up right to node: " + L);
+                if (!wrongLRight) {
+                    wrongLRight = true;
+                    tree[L*2+1] += value;
+                }  
             }
 
-            if (!RLeft && !wrongRLeft) { //If going upleft from right-side is not valid (node not in interval)
-                System.out.println("Rightside: Going up left not valid to node: " + R);
-                wrongRLeft = true; //Else, remember latest where it was valid
-                tempR = R; //Previous position
-            } else {
-                System.out.println("Rightside: Going up left to node: " + R);
-            }
+            if (RLeft) { //If going upleft from right-side is not valid (node not in interval)
+                if (wrongRLeft) {
+                    tree[R*2] += value;
 
-            
-           
+                }  
+            } 
+            else {  
+                if (!wrongRLeft) {
+                    wrongRLeft = true; //Else, remember latest where it was valid
+                    tree[R*2] += value;
+                }
+            }
         }
     }
 
-    int getSum(int index) {
+    long getSum(int index) {
         int pos = index + offset;
-        System.out.println("Starting pos: " + pos);
-        int sum = tree[pos];
-        while (pos != 0) {
-            boolean upRight = (pos % 2) == 1; //Is up right?
-            boolean upLeft = (pos % 2) == 0; //Is up left?
-            pos /= 2;
-            if (upRight == upLeft) { //Cannot go anywhere, reached root
-                break;
-            }
-            
-            if (upRight) {
-                System.out.println("Goint to node: " + pos + " and found value: " + tree[pos]);
-                sum += tree[pos]; 
-            }
-            if (upLeft) {
-                System.out.println("Goint to node: " + pos + " and found value: " + tree[pos]);
-                sum += tree[pos];
-            }
-            
-        }
-        return sum;
 
+        long sum = 0;
+        do {
+            sum += tree[pos];
+            pos /= 2;
+            
+        } while (pos > 0) ;
+        
+        return sum;
     }
 }
