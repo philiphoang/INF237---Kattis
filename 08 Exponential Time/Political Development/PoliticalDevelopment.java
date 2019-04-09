@@ -6,9 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.OutputStream;
+
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Collections;
 
 class Kattio extends PrintWriter {
     public Kattio(InputStream i) {
@@ -41,6 +43,7 @@ class Kattio extends PrintWriter {
     }
 
 
+
     private BufferedReader r;
     private String line;
     private StringTokenizer st;
@@ -65,67 +68,67 @@ class Kattio extends PrintWriter {
         return ans;
     }
 }
-public class FreeWeights {
+
+public class PoliticalDevelopment {
     public static void main(String[] args) {
         Kattio io = new Kattio(System.in);
 
-        List<Integer> row1 = new ArrayList<>();
-        List<Integer> row2 = new ArrayList<>();
+        int N = io.getInt();
+        int K = io.getInt();
 
+        Map<Integer, List<Integer>> politicans = new HashMap<>();
         
-        int n = io.getInt();
-        for (int i = 0; i < n; i++) {
-            row1.add(io.getInt());
+        for (int i = 0; i < N; i++) {
+            int D = io.getInt();
+            List<Integer> group = new ArrayList<>();
+            for (int j = 0; j < D; j++) {
+                group.add(io.getInt());
+            } 
+            if (D != 0)
+                group.add(i);
+            politicans.put(i, group);
         }
 
-        for (int i = 0; i < n; i++) {
-            row2.add(io.getInt());
+        //printPoliticans(politicans);
+        System.out.println(bruteForce(politicans, N));
+        
+    }
+    
+    static long bruteForce(Map<Integer, List<Integer>> politicans, int N) {
+        long max = 0;
+        for (int i = 0; i < N; i++) {
+            List<Integer> groupi = new ArrayList<>(politicans.get(i));
+            long size =0;
+            for (int j = 0; j < N; j++) {
+                //Need to hop over politicans.get(i)
+                if (i != j) {
+                    //System.out.println("Hop over");
+                
+                    groupi.retainAll(politicans.get(j));
+                    //System.out.println("groupi size: " + groupi.size());
+                    size = groupi.size();
+                    groupi.clear();
+
+
+                }
+                if (max < size) {
+                    max = size;
+                }
+
+            }
         }
 
- 
-        List<Integer> sortedRows = new ArrayList<>(row1);
-        sortedRows.addAll(row2);
-        sortedRows.add(0); //If all weights are already paired, might not even lift 
-
-        Collections.sort(sortedRows);
-
-        //Binary Search on lists
-        
-        int lo = -1;
-        int hi = sortedRows.size();
-        int current = 0;
-
-        while (lo + 1 < hi) {
-            int mid = (lo+hi)/2
-            System.out.println("mid: " + mid);
-            int midWeightFromSorted = sortedRows.get(mid);
-
-            if (paired) {
-                hi = mid;
-                current = midWeightFromSorted;
-            } else {
-                lo = mid;
-            }
-        } 
-
-        System.out.println(current);
+        return max;
     }
 
-    public static boolean checkPair(List<Integer> row, int currentWeight) {
-        int holding = -1; //Currently holding no weight
-        System.out.println(r);
-        for (int i = 0; i < row.size(); i++) {
-            if (row.get(i) > currentWeight)
-                if (holding == -1) { 
-                    holding = row.get(i); //Hold this weight
-                }
-                else {
-                    if (holding != row.get(i)) { //Check the weight we are holding has the same weight as the next one
-                        return false;
-                    }
-                    holding = -1;
-                }
+    static void printPoliticans(Map<Integer, List<Integer>> politicans) {
+        for (int i : politicans.keySet()) {
+            System.out.print(i + " ");
+            for (int p : politicans.get(i)) {
+                System.out.print(p + " ");
             }
-        return holding == -1;
+            System.out.println();
+        }
     }
+
 }

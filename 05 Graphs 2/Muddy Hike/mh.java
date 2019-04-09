@@ -126,7 +126,15 @@ public class mh {
             d[i][0] = terrain[i][0];
         }
         
+        System.out.println();
         io.println(dijkstra());
+        System.out.println();
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                System.out.print(d[i][j] + " ");
+            }
+            System.out.println();
+        }
 
         io.close();
 
