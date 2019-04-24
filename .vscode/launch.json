@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - CitrusIntern",
+            "request": "launch",
+            "mainClass": "CitrusIntern",
+            "projectName": "INF237---Kattis_3b1cd10b"
+        },
+        {
+            "type": "java",
             "name": "Debug (Launch)",
             "request": "launch",
             "mainClass": "06 Segment Trees.Points of Snow.PointsofSnow"

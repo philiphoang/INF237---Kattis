@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - p",
+            "request": "launch",
+            "mainClass": "p",
+            "projectName": "PokemonGoGo_b1aa632b"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - solution",
+            "request": "launch",
+            "mainClass": "solution",
+            "projectName": "PokemonGoGo_b1aa632b"
+        }
+    ]
+}
