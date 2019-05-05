@@ -38,8 +38,6 @@ class Kattio extends PrintWriter {
         return nextToken();
     }
 
-
-
     private BufferedReader r;
     private String line;
     private StringTokenizer st;
@@ -66,55 +64,99 @@ class Kattio extends PrintWriter {
 }
 
 public class RobotProtection {
-    static PriorityQueue<Point> sortedQueue;
-    static Point[] points;
     public static void main(String[] args) {
         Kattio io = new Kattio(System.in);
 
         int n = io.getInt(); 
 
-        sortedQueue = new PriorityQueue<>();
-
         while (n != 0) {
-            points = new Point[n];
+            Point[] points = new Point[n];
             for (int i = 0; i < n; i++) {
                 int x = io.getInt();
                 int y = io.getInt();
-                sortedQueue.add(new Point(x, y));
                 points[i] = new Point(x, y);
             }
 
-            Arrays.sort(points); //Sort list to find lowest point
-            convexHull(points);
+            if (n > 2) {
+                io.println(convexHull(points));
+            }
+            else 
+                io.println(0);
             n = io.getInt();
 
         } 
+        io.close();
+    }
+
+    static double convexHull(Point[] points) {
+        ArrayList<Point> list = new ArrayList<>();
         
-        for (Point p : points) {
-            System.out.println(p.x + "," + p.y);
+        Arrays.sort(points); //Lower wrap
+  
+        Stack<Point> stack = grahamScan(points);
+        while (!stack.isEmpty()) {
+            list.add(stack.pop());
         }
+
+        Arrays.sort(points, Collections.reverseOrder()); //Upper wrap
+
+        stack = grahamScan(points);
+        while (!stack.isEmpty()) {
+            list.add(stack.pop());
+        }
+
+        return computeAreaOfPolygon(list);
     }
 
-    static void convexHull(Point[] points) {
-        Point P0 = points[0];
+    
 
-        //Sort points by polar angle with P0
+    static Stack grahamScan(Point[] points) {
+        Stack<Point> stack = new Stack<>();
+        stack.push(points[0]); 
+        stack.push(points[1]);
 
+        for (int i = 2; i < points.length; i++) {
+            while (stack.size() > 1 && orientation(nextToTop(stack), stack.peek(), points[i]) != 2) {
+                stack.pop();
+            }
+            stack.push(points[i]);
+        }
+        return stack;
     }
 
-    int polarAngle(Point P0, Point P1, Point P2) {
+    static float computeAreaOfPolygon(ArrayList<Point> list) {
+        float area = 0;
+        for (int i = 1; i < list.size(); i++) {
+            area += list.get(i - 1).x * list.get(i).y -
+                    list.get(i - 1).y * list.get(i).x;
+        }
 
+        return -area / 2;
     }
 
-    int orientation(Point P0, Point P1, Point P2) {
-        int val = (P1.y - P0.y) *
+    static int distance(Point P1, Point P2) {
+        return (P1.x - P2.x)*(P1.x - P2.x) +
+               (P1.y - P2.y)*(P1.y - P2.y);
     }
 
-    int distance(Point p1, Point p2) {
-        return (p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.x)*(p1.y - p2.x);
+    static Point nextToTop(Stack<Point> stack) {
+        Point point = stack.pop();
+        Point res = stack.peek();
+        stack.push(point);
+        return res;
     }
 
-
+    static int orientation(Point P0, Point P1, Point P2) {
+        int area = (P1.y - P0.y) * (P2.x - P1.x)
+                 - (P1.x - P0.x) * (P2.y - P1.y);
+            
+        if (area == 0) 
+            return 0; //Colinear
+        else if (area > 0)
+            return 1; //Clockwise
+        else 
+            return 2; //Counter clockwise
+    }
 }
 
 class Point implements Comparable<Point> {
@@ -128,15 +170,15 @@ class Point implements Comparable<Point> {
 
     @Override
     public int compareTo(Point that) {
-        if (this.y > that.y)
+        if (this.x < that.x) 
             return 1;
-        if (this.y < that.y)
+        if (this.x > that.x) 
             return -1;
-        if (this.x > that.x)
+        if (this.y < that.y) 
             return 1;
-        if (this.x < that.x)
+        if (this.y > that.y) 
             return -1;
-        
+          
         return 0;
-    }
+    } 
 }
