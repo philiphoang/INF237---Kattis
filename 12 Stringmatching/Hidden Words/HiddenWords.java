@@ -90,8 +90,9 @@ public class HiddenWords {
         for (int i = 0; i < n; i++) {
             String word = io.getWord();
             if (!map.containsKey(word)) {
-                map.put(word, true);
+                map.put(word, false);
                 if (lookup(word)) {
+                    map.put(word, true);
                     counter++;
                 }
             }
@@ -110,16 +111,17 @@ public class HiddenWords {
         int pos = 0;
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-                if (s.length == findNext(i, j, s, pos, 0)) {
-                    return true;         
-                }
+                if (s[0].equals(puzzle[i][j]))
+                    if (s.length == findNext(i, j, s, pos, 1)) {
+                        return true;         
+                    }
             }
         } 
 
         return false;
     }
 
-    boolean inRange(int x, int y) {
+    static boolean inRange(int x, int y) {
         return x < h && y < w &&
                x >= 0 && y >= 0;
     }
@@ -131,15 +133,18 @@ public class HiddenWords {
         if (pos >= s.length)
             return counter;
 
+        if (!inRange(x, y))
+            return counter;
+
         visited[x][y] = true;
           
-        if (y + 1 < w) {
+        if (y + 1 < w) 
             if (puzzle[x][y + 1].equals(s[pos]))
                 if (!visited[x][y + 1]) { //Right
                     counter++;
                     return findNext(x, y + 1, s, pos, counter);
                 }
-            }
+            
                
         if (y - 1 >= 0) 
             if (puzzle[x][y - 1].equals(s[pos]))
@@ -161,6 +166,7 @@ public class HiddenWords {
                     counter++;
                     return findNext(x + 1, y, s, pos, counter);
             }
+            
         visited[x][y] = false;
 
         return counter;

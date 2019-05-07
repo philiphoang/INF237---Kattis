@@ -1,32 +1,3 @@
-/** Simple yet moderately fast I/O routines.
- *
- * Example usage:
- *
- * Kattio io = new Kattio(System.in, System.out);
- *
- * while (io.hasMoreTokens()) {
- *    int n = io.getInt();
- *    double d = io.getDouble();
- *    double ans = d*n;
- *
- *    io.println("Answer: " + ans);
- * }
- *
- * io.close();
- *
- *
- * Some notes:
- *
- * - When done, you should always do io.close() or io.flush() on the
- *   Kattio-instance, otherwise, you may lose output.
- *
- * - The getInt(), getDouble(), and getLong() methods will throw an
- *   exception if there is no more data in the input, so it is generally
- *   a good idea to use hasMoreTokens() to check for end-of-file.
- *
- * @author: Kattis
- */
-
 import java.util.StringTokenizer;
 import java.io.BufferedReader;
 import java.io.BufferedOutputStream;
@@ -92,4 +63,46 @@ class Kattio extends PrintWriter {
         token = null;
         return ans;
     }
+}
+
+public class Reseto {
+    
+    public static void main(String[] args) {
+        Kattio io = new Kattio(System.in);
+        int N = io.getInt();
+        int K = io.getInt();
+
+        io.println(eratosthenes(N, K));
+        io.close();
+    }
+
+    static int eratosthenes(int N, int K) {
+        boolean[] prime = new boolean[N+1];
+        prime[0] = true;
+        prime[1] = true;
+
+        int i = 0;
+        int p = 0;
+        boolean found = false;
+
+        while (!found) {
+            for (i = 0; i < prime.length; i++)
+                if (!prime[i])
+                    break;
+            
+            for (p = i; p < prime.length; p += i) {
+                if (!prime[p]) {
+                    prime[p] = true;
+                    K--;
+                }
+                
+                if (K == 0) {
+                    found = true;
+                    return p;
+                }
+            }
+        }
+        return p;
+    }
+
 }
